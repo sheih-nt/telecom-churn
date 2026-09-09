@@ -23,7 +23,8 @@ telecom-churn/
 └── templates
     └── index.html
 
-
+## Файл Data.xlsx
+Тут ход работы, что то я смотрел, проверял питон
 
 ## Запуск
 
