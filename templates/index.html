@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Telecom Churn Dashboard</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f4f6f9;
+            color: #172033;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 1450px;
+            margin: auto;
+            padding: 30px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 30px;
+        }
+
+        .subtitle {
+            margin-top: 7px;
+            margin-bottom: 25px;
+            color: #6b7280;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 14px;
+
+            margin-bottom: 16px;
+        }
+
+        .kpis {
+            display: grid;
+            grid-template-columns:
+                repeat(6, 1fr);
+
+            gap: 14px;
+
+            margin-bottom: 16px;
+        }
+
+        .card {
+            background: white;
+
+            border: 1px solid #e5e7eb;
+
+            border-radius: 14px;
+
+            padding: 17px;
+
+            box-shadow:
+                0 2px 8px
+                rgba(0, 0, 0, 0.04);
+        }
+
+        .filter-title {
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        select {
+            width: 100%;
+
+            margin-top: 7px;
+
+            padding: 9px;
+
+            border: 1px solid #ddd;
+
+            border-radius: 8px;
+
+            background: white;
+        }
+
+        .kpi-title {
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        .kpi-value {
+            margin-top: 8px;
+
+            font-size: 25px;
+
+            font-weight: bold;
+        }
+
+        .charts {
+            display: grid;
+
+            grid-template-columns:
+                1fr 1fr;
+
+            gap: 16px;
+        }
+
+        .chart-card {
+            min-height: 380px;
+        }
+
+        .wide {
+            grid-column: 1 / -1;
+        }
+
+        .chart {
+            height: 310px;
+        }
+
+        .priority {
+            display: grid;
+
+            grid-template-columns:
+                1fr 1fr;
+
+            gap: 16px;
+
+            margin-top: 16px;
+        }
+
+        .risk {
+            color: #dc2626;
+
+            font-size: 26px;
+
+            font-weight: bold;
+        }
+
+        .stats {
+            display: flex;
+
+            gap: 45px;
+
+            margin-top: 20px;
+        }
+
+        .stats span {
+            display: block;
+
+            color: #6b7280;
+
+            font-size: 12px;
+        }
+
+        .stats strong {
+            display: block;
+
+            margin-top: 5px;
+
+            font-size: 23px;
+        }
+
+        @media (max-width: 1050px) {
+
+            .kpis {
+                grid-template-columns:
+                    repeat(3, 1fr);
+            }
+
+            .filters {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+        }
+
+        @media (max-width: 650px) {
+
+            .container {
+                padding: 15px;
+            }
+
+            .kpis,
+            .filters,
+            .charts,
+            .priority {
+                grid-template-columns: 1fr;
+            }
+
+            .wide {
+                grid-column: auto;
+            }
+
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>
+        Дашборд оттока клиентов
+    </h1>
+
+    <div class="subtitle">
+        Telecom business · управление удержанием
+    </div>
+
+
+    <div class="filters">
+
+        <div class="card">
+
+            <div class="filter-title">
+                Контракт
+            </div>
+
+            <select id="contract">
+
+                <option value="">
+                    Все
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="filter-title">
+                Интернет
+            </div>
+
+            <select id="internet">
+
+                <option value="">
+                    Все
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="filter-title">
+                Стаж
+            </div>
+
+            <select id="tenure">
+
+                <option value="">
+                    Все
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="filter-title">
+                Способ оплаты
+            </div>
+
+            <select id="payment">
+
+                <option value="">
+                    Все
+                </option>
+
+            </select>
+
+        </div>
+
+    </div>
+
+
+    <div class="kpis">
+
+        <div class="card">
+
+            <div class="kpi-title">
+                Клиенты
+            </div>
+
+            <div
+                class="kpi-value"
+                id="customers"
+            >
+                —
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="kpi-title">
+                Ушедшие клиенты
+            </div>
+
+            <div
+                class="kpi-value"
+                id="churned"
+            >
+                —
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="kpi-title">
+                Churn Rate
+            </div>
+
+            <div
+                class="kpi-value"
+                id="churnRate"
+            >
+                —
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="kpi-title">
+                MRR
+            </div>
+
+            <div
+                class="kpi-value"
+                id="mrr"
+            >
+                —
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="kpi-title">
+                Средний платёж
+            </div>
+
+            <div
+                class="kpi-value"
+                id="avgMonthly"
+            >
+                —
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="kpi-title">
+                Средний CLTV
+            </div>
+
+            <div
+                class="kpi-value"
+                id="avgCltv"
+            >
+                —
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="charts">
+
+
+        <div class="card chart-card">
+
+            <h3>
+                Отток по контракту
+            </h3>
+
+            <div class="chart">
+
+                <canvas id="contractChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+        <div class="card chart-card">
+
+            <h3>
+                Отток по интернету
+            </h3>
+
+            <div class="chart">
+
+                <canvas id="internetChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+        <div class="card chart-card">
+
+            <h3>
+                Отток по стажу
+            </h3>
+
+            <div class="chart">
+
+                <canvas id="tenureChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+        <div class="card chart-card">
+
+            <h3>
+                Отток по способу оплаты
+            </h3>
+
+            <div class="chart">
+
+                <canvas id="paymentChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+        <div class="card chart-card wide">
+
+            <h3>
+                Top-10 причин оттока
+            </h3>
+
+            <div class="chart">
+
+                <canvas id="reasonChart"></canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="priority">
+
+
+        <div class="card">
+
+            <h3>
+                Приоритетный сегмент
+            </h3>
+
+            <div class="risk">
+                Month-to-month +
+                Fiber optic
+            </div>
+
+
+            <div class="stats">
+
+                <div>
+
+                    <span>
+                        Клиенты
+                    </span>
+
+                    <strong id="priorityCustomers">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Ушли
+                    </span>
+
+                    <strong id="priorityChurned">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Churn Rate
+                    </span>
+
+                    <strong id="priorityRate">
+                        —
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>
+                Управленческий фокус
+            </h3>
+
+            <p>
+                Снижение оттока за счёт
+                улучшения продукта и сервиса,
+                перевода клиентов на устойчивые
+                контракты и работы с клиентом
+                на всём жизненном цикле.
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const charts = {};
+
+
+function formatNumber(value) {
+
+    return Math.round(value)
+        .toLocaleString("ru-RU");
+
+}
+
+
+function formatPercent(value) {
+
+    return Number(value)
+        .toFixed(2) + "%";
+
+}
+
+
+function createChart(
+    id,
+    labels,
+    values,
+    horizontal = false,
+    isCount = false
+) {
+
+    if (charts[id]) {
+
+        charts[id].destroy();
+
+    }
+
+
+    charts[id] = new Chart(
+        document.getElementById(id),
+        {
+
+            type: "bar",
+
+            data: {
+
+                labels: labels,
+
+                datasets: [
+
+                    {
+
+                        data: values,
+
+                        backgroundColor:
+                            "#4f46e5",
+
+                        borderRadius: 6
+
+                    }
+
+                ]
+
+            },
+
+
+            options: {
+
+                indexAxis:
+                    horizontal
+                        ? "y"
+                        : "x",
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                plugins: {
+
+                    legend: {
+
+                        display: false
+
+                    },
+
+                    tooltip: {
+
+                        callbacks: {
+
+                            label: function(context) {
+
+                                if (isCount) {
+
+                                    return (
+                                        context.raw +
+                                        " клиентов"
+                                    );
+
+                                }
+
+                                return formatPercent(
+                                    context.raw
+                                );
+
+                            }
+
+                        }
+
+                    }
+
+                },
+
+                scales: {
+
+                    x: {
+
+                        beginAtZero: true
+
+                    },
+
+                    y: {
+
+                        beginAtZero: true
+
+                    }
+
+                }
+
+            }
+
+        }
+    );
+
+}
+
+
+function getParams() {
+
+    const params =
+        new URLSearchParams();
+
+
+    [
+        "contract",
+        "internet",
+        "tenure",
+        "payment"
+    ].forEach(function(id) {
+
+        const value =
+            document.getElementById(id)
+                .value;
+
+        if (value) {
+
+            params.set(id, value);
+
+        }
+
+    });
+
+
+    return params;
+
+}
+
+
+async function loadOptions() {
+
+    const response =
+        await fetch("/api/options");
+
+    const data =
+        await response.json();
+
+
+    const fields = {
+
+        contract: data.contract,
+
+        internet: data.internet,
+
+        tenure: data.tenure,
+
+        payment: data.payment
+
+    };
+
+
+    Object.entries(fields)
+        .forEach(function([id, values]) {
+
+            const select =
+                document.getElementById(id);
+
+
+            values.forEach(function(value) {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+                option.value = value;
+
+                option.textContent =
+                    value;
+
+                select.appendChild(option);
+
+            });
+
+
+            select.addEventListener(
+                "change",
+                loadDashboard
+            );
+
+        });
+
+}
+
+
+async function loadDashboard() {
+
+    const response =
+        await fetch(
+            "/api/dashboard?" +
+            getParams()
+        );
+
+
+    const data =
+        await response.json();
+
+
+    document.getElementById(
+        "customers"
+    ).textContent =
+        formatNumber(
+            data.kpi.customers
+        );
+
+
+    document.getElementById(
+        "churned"
+    ).textContent =
+        formatNumber(
+            data.kpi.churned
+        );
+
+
+    document.getElementById(
+        "churnRate"
+    ).textContent =
+        formatPercent(
+            data.kpi.churn_rate
+        );
+
+
+    document.getElementById(
+        "mrr"
+    ).textContent =
+        formatNumber(
+            data.kpi.mrr
+        );
+
+
+    document.getElementById(
+        "avgMonthly"
+    ).textContent =
+        Number(
+            data.kpi.avg_monthly
+        ).toFixed(2);
+
+
+    document.getElementById(
+        "avgCltv"
+    ).textContent =
+        formatNumber(
+            data.kpi.avg_cltv
+        );
+
+
+    createChart(
+
+        "contractChart",
+
+        data.contract.map(
+            x => x.Contract
+        ),
+
+        data.contract.map(
+            x => x.churn_rate
+        )
+
+    );
+
+
+    createChart(
+
+        "internetChart",
+
+        data.internet.map(
+            x => x["Internet Service"]
+        ),
+
+        data.internet.map(
+            x => x.churn_rate
+        )
+
+    );
+
+
+    const tenureOrder = [
+        "0-3",
+        "4-6",
+        "7-12",
+        "13-24",
+        "25-48",
+        "49-72"
+    ];
+
+
+    const tenureMap =
+        Object.fromEntries(
+            data.tenure.map(
+                x => [
+                    x["Tenure Group"],
+                    x
+                ]
+            )
+        );
+
+
+    createChart(
+
+        "tenureChart",
+
+        tenureOrder,
+
+        tenureOrder.map(
+            x =>
+                tenureMap[x]
+                    ? tenureMap[x].churn_rate
+                    : 0
+        )
+
+    );
+
+
+    createChart(
+
+        "paymentChart",
+
+        data.payment.map(
+            x => x["Payment Method"]
+        ),
+
+        data.payment.map(
+            x => x.churn_rate
+        )
+
+    );
+
+
+    createChart(
+
+        "reasonChart",
+
+        data.reasons.map(
+            x =>
+                x["Churn Reason"] ||
+                "Не указано"
+        ),
+
+        data.reasons.map(
+            x => x.count
+        ),
+
+        true,
+
+        true
+
+    );
+
+
+    document.getElementById(
+        "priorityCustomers"
+    ).textContent =
+        formatNumber(
+            data.priority.customers
+        );
+
+
+    document.getElementById(
+        "priorityChurned"
+    ).textContent =
+        formatNumber(
+            data.priority.churned
+        );
+
+
+    document.getElementById(
+        "priorityRate"
+    ).textContent =
+        formatPercent(
+            data.priority.churn_rate
+        );
+
+}
+
+
+loadOptions()
+    .then(loadDashboard);
+
+</script>
+
+</body>
+
+</html>
