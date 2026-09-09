@@ -1,3 +1,7 @@
+## Файл Data.xlsx
+Тут ход работы, что то я смотрел, проверял питон
+
+
 ## Screenshots
 
 ![Screenshot 1](assets/2026-09-09-18:09:55-screenshot.png)
@@ -23,8 +27,7 @@ telecom-churn/
 └── templates
     └── index.html
 
-## Файл Data.xlsx
-Тут ход работы, что то я смотрел, проверял питон
+
 
 ## Запуск
 
