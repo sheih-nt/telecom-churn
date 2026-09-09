@@ -1,4 +1,14 @@
+## Screenshots
 
+![Screenshot 1](assets/2026-09-09-18:09:55-screenshot.png)
+
+![Screenshot 2](assets/2026-09-09-18:10:01-screenshot.png)
+
+![Screenshot 3](assets/2026-09-09-18:10:07-screenshot.png)
+
+![Screenshot 4](assets/2026-09-09-18:10:13-screenshot.png)
+
+![Screenshot 5](assets/2026-09-09-18:10:30-screenshot.png)
 ## Структура проекта
 
 telecom-churn/
